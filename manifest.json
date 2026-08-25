@@ -1,9 +1,9 @@
 {
   "id": "data-autocomplete",
   "name": "Data Autocomplete",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "minAppVersion": "1.4.0",
-  "description": "Obsidian 内完全本地运行的数据自动补全引擎：直接解析 vault 内 Excel/CSV，按报告上下文从真实数据检索候选数值并强制溯源；无外部服务、无 LLM。支持占位符补全、指标缺值波浪线 + 下拉/Tab 补全、语义兜底、手动搜索、备份恢复。",
+  "description": "A fully local data autocomplete engine: parses Excel/CSV files in your vault, retrieves real values by report context with forced source tracing. No external services, no LLM. Supports placeholder completion, wavy underline + dropdown/Tab completion, semantic fallback, manual search, and backup restore.",
   "author": "phoenixyun",
   "authorUrl": "https://github.com/phoenixyun",
   "isDesktopOnly": true

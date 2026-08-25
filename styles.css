@@ -73,15 +73,15 @@
 /* Obsidian 的 CM tooltip 外层容器默认是实色背景，会盖住玻璃效果；
    通过 tooltipSpec 的 class 属性给容器加 .store-ac-tip，精确透明化（含 section/arrow 内层），
    露出 backdrop-filter 的玻璃质感（Apple 风格）。 */
-.cm-tooltip.store-ac-tip,
-.cm-tooltip.store-ac-tip .cm-tooltip-section,
-.cm-tooltip.store-ac-tip .cm-tooltip-arrow,
-.cm-tooltip.store-ac-tip > * {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  overflow: visible !important;
+body .cm-tooltip.store-ac-tip,
+body .cm-tooltip.store-ac-tip .cm-tooltip-section,
+body .cm-tooltip.store-ac-tip .cm-tooltip-arrow,
+body .cm-tooltip.store-ac-tip > * {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  overflow: visible;
 }
 /* 玻璃面板：浅色主题 = 白色玻璃，深色主题 = 深色玻璃（Apple 毛玻璃配色）。
    不用 --background-primary（浅色下是 #e4e4e4 灰，会和编辑器背景同色，看不出玻璃）。 */
@@ -239,11 +239,7 @@ body.theme-dark .store-ac-inline {
 }
 /* 上下文波浪线：当前行内引擎识别的门店/日期/指标/占位符统一红色波浪下划线 */
 .store-ac-wave {
-  text-decoration-line: underline;
-  text-decoration-style: wavy;
-  text-decoration-color: #e05252;
-  -webkit-text-decoration-line: underline;
-  -webkit-text-decoration-style: wavy;
-  -webkit-text-decoration-color: #e05252;
+  text-decoration: underline wavy #e05252;
+  -webkit-text-decoration: underline wavy #e05252;
   text-underline-offset: 3px;
 }

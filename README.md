@@ -1,39 +1,36 @@
-# 数据自动补全（Obsidian 插件 · 纯本地 · 无 LLM）
+# Data Autocomplete
 
-在 Obsidian 内**完全本地运行**的数据自动补全插件：直接解析 vault 里的 Excel/CSV，用「报告上下文 → 数据请求检测 → 状态机检索」从**真实数据**中给出候选与溯源。
+A fully local data autocomplete engine for Obsidian: it parses Excel/CSV files inside your vault and retrieves real values by report context, with forced source tracing. No external services, no LLM, no Python backend — your data never leaves the vault.
 
-**无外部服务、无 Python 后端、无 LLM**（四条铁律：只检索真实数据 / 数据溯源强制 / 不盲目执行方案 / 真实实现优先）。
-
-- 版本：**0.1.6**
-- 类别：桌面端插件（`isDesktopOnly: true`）
-- 安装方式与 Obsidian 官方一致：把整个文件夹复制到 `<vault>/.obsidian/plugins/data-autocomplete/`。
-- **版本核对**：设置页标题会显示 `v0.1.6`；`manifest.json`、设置页标题、zip 文件名三处一致，以此确认没装错包。
+- Version: **0.1.8**
+- Category: Desktop plugin (`isDesktopOnly: true`)
+- Install: copy this folder to `<vault>/.obsidian/plugins/data-autocomplete/`, then enable it in Settings → Community plugins (turn off restricted mode).
 
 ---
 
-## 这是什么
+## What it does
 
-写报告/文档时，经常需要把「指标名 + 数值」填进正文。本插件把这件事自动化：
+When writing reports or documents, you often need to fill "metric name + value" into the text. This plugin automates that:
 
-1. 你把 Excel/CSV 放进 vault 的数据目录（默认 `data-autocomplete-data/`）；
-2. 写正文时用占位符标注待补数据（如「本月试驾量为【待补充】」），或直接写指标名不写数值；
-3. 插件按**报告上下文**（首行标题 + 当前段落）解析出「指标 / 主体 / 日期」，从**真实数据**中检索候选数值；
-4. 每条候选都带**溯源**（文件 / 工作表 / 行号），检索不到就显示 `NO_RESULT`——**绝不编造数值**。
+1. Put your Excel/CSV files into the vault's data directory (default `data-autocomplete-data/`);
+2. While writing, mark missing data with a placeholder (e.g. `本月试驾量为【待补充】`), or just write the metric name without a value;
+3. The plugin parses the **report context** (first-line title + current paragraph) to extract "metric / entity / date", then retrieves candidate values from **real data**;
+4. Every candidate carries a **source trace** (file / sheet / row number). If nothing matches, it shows `NO_RESULT` — it **never fabricates values**.
 
-它不依赖任何外部服务，数据不出 vault，完全离线可用。
+It depends on no external service. Data stays inside the vault and works fully offline.
 
-## 安装（3 步）
+## Install (3 steps)
 
-1. **放数据**：在 vault 根目录建 `data-autocomplete-data/` 文件夹，把 Excel/CSV 放进去（支持：
-   - 窄表：`维度1/维度2/月份/指标/数值/指标说明`
-   - 层级宽表 / 单主体宽表：第 1 行表头（`…/具体指标/指标说明/主体`），第 2 行日期列（`累计值`/`2026-07月数据`/排名比数列），数据从第 3 行起）
-   - 目录名可在设置里改。
-2. **装插件**：复制本文件夹到 `<vault>/.obsidian/plugins/data-autocomplete/`，在「设置 → 第三方插件」启用（关闭受限模式）。
-3. **重建索引**：命令面板执行 **「重建数据索引（解析 vault 内 Excel/CSV）」**，或在设置页点「重建索引」。
+1. **Add data**: create a `data-autocomplete-data/` folder in your vault root and put Excel/CSV files inside (supported layouts:
+   - Narrow table: `dimension1/dimension2/month/metric/value/metric description`
+   - Hierarchical wide table / single-entity wide table: row 1 headers (`…/specific metric/metric description/entity`), row 2 date columns (`累计值`/`2026-07月数据`/ranking columns), data starts from row 3)
+   - The directory name can be changed in settings.
+2. **Install the plugin**: copy this folder to `<vault>/.obsidian/plugins/data-autocomplete/`, then enable it in Settings → Community plugins (turn off restricted mode).
+3. **Rebuild the index**: run **「重建数据索引（解析 vault 内 Excel/CSV）」** from the command palette, or click "Rebuild index" on the settings page.
 
-## 用法
+## Usage
 
-- 写报告时用占位符标注待补数据，例如：
+- Mark missing data with placeholders while writing, for example:
 
   ```text
   华东区 2026年7月经营数据
@@ -42,100 +39,98 @@
   客单价【待补充】，单车毛利为【待补充】，成交率【待补充】。
   ```
 
-- 执行 **「分析当前笔记（数据自动补全候选）」**（`Ctrl/Cmd+P`），弹窗列出每个数据请求：
-  - 请求类型（`placeholder` / `metric_no_value`）、置信度、指标词、原句
-  - 解析出的维度：指标（匹配方式）· 主体（作用域）· 日期（作用域）· 缺失项
-  - 检索状态（`EXACT` / `ALIAS` / `PARTIAL` / `NO_RESULT`）与说明
-  - 每条候选事实：**真实数值 + 主体 + 日期 + 匹配方式 + 溯源（文件/工作表/行号）**
-  - 「复制候选文本」一键写入笔记。
+- Run **「分析当前笔记（数据自动补全候选）」** (`Ctrl/Cmd+P`), and a popup lists every data request:
+  - Request type (`placeholder` / `metric_no_value`), confidence, metric word, original sentence
+  - Parsed dimensions: metric (match mode) · entity (scope) · date (scope) · missing item
+  - Retrieval status (`EXACT` / `ALIAS` / `PARTIAL` / `NO_RESULT`) with explanation
+  - Each candidate fact: **real value + entity + date + match mode + source trace (file/sheet/row)**
+  - "Copy candidate text" writes it into the note in one click.
 
-- `NO_RESULT` 是**正常路径**：说明真实数据里没有对应记录，本插件绝不编造数值。
+- `NO_RESULT` is a **normal path**: it means there is no matching record in the real data. This plugin never invents numbers.
 
-## 命令
+## Commands
 
-- `重建数据索引（解析 vault 内 Excel/CSV）`
-- `分析当前笔记（数据自动补全候选）`
-- `数据索引概览`
-- `手动搜索数据（查询理解 + 排序）`：输入自然语言查询（如「华东区 3月 客流量」），走「查询理解 → 元数据 narrowing → 排序」链路；支持 `baseline` / `keyword_boost` / `vector_pure` 三种变体权重
-- `数据预览：单主体单指标全部历史`：选主体 + 指标，分页查看全部历史记录
-- `浏览数据：全量明细分页`：全量记录分页浏览
-- `多表管理：切换活跃数据表`：数据目录下每个子文件夹 = 一张命名表，可切换活跃表（持久化到设置）
-- `创建数据备份（打包数据目录）`：数据目录打包为 zip 存到插件 `backups/`
-- `恢复最新备份`：从 `backups/` 最新 zip 恢复数据目录
-- `确保数据目录存在（幂等）`：数据目录不存在时自动创建
-- `一键补全全部占位符（auto/manual/nodata）`：扫描全文所有【】占位符，逐个检索并填充；结果分类 auto（唯一事实自动填充）/ manual（多候选需人工选择）/ nodata（无数据，保持占位符不动）
-- `展开省略号为【待补充】占位符`：把「。。。」/「...」/「……」转换为【待补充】，便于后续补全
+- `重建数据索引（解析 vault 内 Excel/CSV）` — rebuild the data index
+- `分析当前笔记（数据自动补全候选）` — analyze the current note for autocomplete candidates
+- `数据索引概览` — data index overview
+- `手动搜索数据（查询理解 + 排序）` — manual search with natural-language query understanding and ranking
+- `数据预览：单主体单指标全部历史` — preview all history for one entity + one metric
+- `浏览数据：全量明细分页` — browse all records with pagination
+- `多表管理：切换活跃数据表` — switch the active data table (each subfolder = one named table)
+- `创建数据备份（打包数据目录）` — back up the data directory as a zip
+- `恢复最新备份` — restore from the latest backup
+- `确保数据目录存在（幂等）` — ensure the data directory exists (idempotent)
+- `一键补全全部占位符（auto/manual/nodata）` — fill all placeholders in one pass (auto / manual / nodata)
+- `展开省略号为【待补充】占位符` — expand ellipses (`。。。`/`...`/`……`) into placeholders
 
-## 设置
+## Settings
 
-### 数据源与基础操作
-- **数据目录**：默认 `data-autocomplete-data`（相对 vault 根）
-- **启动时自动重建索引**：打开 vault 自动解析（默认开）
-- **立即重建索引**：数据文件更新后手动重建（也可用命令面板）
+### Data source & basics
+- **Data directory**: default `data-autocomplete-data` (relative to vault root)
+- **Auto-rebuild index on startup**: parse automatically when the vault opens (default on)
+- **Rebuild index now**: rebuild manually after data files change (or use the command palette)
 
-### 检索与语义
-- **语义兜底（近似匹配·纯本地）**：结构化未命中时用本地哈希向量近似找指标再查真实数据；关闭后仅结构化匹配
-- **语义候选个数**：语义兜底最多展示几个候选指标（默认 3）
-- **语义命中阈值**：低于该相似度的「近似指标」不算命中（默认 0.5 挡噪声）
+### Retrieval & semantics
+- **Semantic fallback (approximate match, fully local)**: when structured retrieval misses, use local hash-vector approximation to find metrics, then query real data; turn off for strict structured matching only
+- **Semantic candidate count**: how many candidate metrics the semantic fallback shows (default 3)
+- **Semantic hit threshold**: below this similarity, "approximate metrics" don't count as hits (default 0.5)
 
-### 编辑器补全与检测
-- **编辑器内联补全（占位符 + 指标名下拉）**：输入「【」时就地展示真实数据候选下拉（↑↓ 选择、回车/点击插入并自动补上「】」）；输入字典指标名前缀时（如「成交」/「本月成交」）弹出指标名下拉，回车补全指标名（默认开）
-- **B 类缺值检测（波浪线 + Tab/下拉补全）**：指标名后 12 字符内无数值时也生成候选：指标名下方画红色波浪线，光标停在指标名末尾弹出**真实数值候选下拉**（↑↓ 选择、回车/点击插入），按 Tab 直接补首个候选
-- **记录补全历史**：每次弹窗复制/内联插入追加一行到 `数据目录/history.jsonl`
+### Editor completion & detection
+- **Inline completion (placeholder + metric-name dropdown)**: typing `【` shows a real-data candidate dropdown in place (↑↓ to select, Enter/click to insert and auto-close `】`); typing a metric-name prefix (e.g. `成交`/`本月成交`) pops up a metric-name dropdown, Enter completes the name (default on)
+- **Type-B missing-value detection (wavy underline + Tab/dropdown completion)**: when a metric name has no value within 12 characters, candidates are generated: a red wavy underline under the metric name; when the cursor stops at the end of the metric name, a **real-value candidate dropdown** pops up (↑↓ to select, Enter/click to insert); Tab inserts the first candidate directly
+- **Record completion history**: every popup copy / inline insert appends a line to `数据目录/history.jsonl`
 
-## 本地自测
+## Local self-test
 
 ```bash
-# 引擎对真实数据的回归测试（不依赖 Obsidian，直接 node 跑）
+# Engine regression tests against real data (no Obsidian needed, plain node)
 node test/engine.test.mjs
 ```
 
-当前 engine 25 项、波浪线标记 9 项、下拉判定 29 项断言全过：窄表 1008 条、层级宽表 498 条、单主体宽表 10 主体 20160 条，共 21666 条真实记录 / 13 主体 / 263 指标；样例笔记 7 个占位符全部 `EXACT` 命中真实值（试驾量 235.3、成交量 35.2、客流量 1086.5、客单价 301569.4、单车毛利 42552.6、成交率 11.2、总利润 8127），且每条都带 `文件/工作表/行号` 溯源。
+Current engine 25 assertions, wavy-mark 9 assertions, dropdown 29 assertions all pass: narrow table 1008 records, hierarchical wide table 498 records, single-entity wide table 10 entities × 20160 records, 21666 real records total / 13 entities / 263 metrics; all 7 placeholders in the sample note hit `EXACT` real values (试驾量 235.3, 成交量 35.2, 客流量 1086.5, 客单价 301569.4, 单车毛利 42552.6, 成交率 11.2, 总利润 8127), each with `file/sheet/row` source trace.
 
-## 开发
+## Development
 
 ```bash
 npm install          # esbuild + xlsx
-npm run build        # src/main.js → 单文件 main.js（1.8MB，含 xlsx）
-npm run test:engine    # 引擎回归
-node test/marks.test.mjs   # 波浪线标记 + Tab 链路
-node test/dropdown.test.mjs  # Navicat 式下拉判定
+npm run build        # src/main.js → single-file main.js (2.1MB, includes xlsx)
+npm run test:engine  # engine regression
+node test/marks.test.mjs    # wavy-mark + Tab chain
+node test/dropdown.test.mjs # dropdown decision
 ```
 
-模块划分（对齐 Python 版管线）：
-`parser.js`（窄表/层级宽表）→ `index.js`（内存索引）→ `context.js`（上下文/主体/日期/指标提取）→ `detector.js`（占位符/指标缺值）→ `retrieval.js`（EXACT→ALIAS→PARTIAL→NO_RESULT）→ `engine.js`（编排，输出与 Python `/analyze-report` 同形状）。
+Module layout (mirrors the Python pipeline):
+`parser.js` (narrow/hierarchical wide tables) → `index.js` (in-memory index) → `context.js` (context/entity/date/metric extraction) → `detector.js` (placeholder/metric-missing detection) → `retrieval.js` (EXACT→ALIAS→PARTIAL→NO_RESULT) → `engine.js` (orchestration, output shaped like the Python `/analyze-report`).
 
-## M2：语义兜底（本版已实现）
+## M2: Semantic fallback (implemented in this version)
 
-当结构化检索（精确/别名/部分）都未命中时，进入语义兜底：
+When structured retrieval (exact/alias/partial) all miss, semantic fallback kicks in:
 
-1. **本地哈希向量 + 余弦**（`semantic.js`）：把指标「表面名」（规范名 + 别名键）做字符/二元组哈希嵌入为 256 维单位向量；查询词同样嵌入后算余弦，取 top-3。
-2. **阈值门控**：余弦 ≥ 0.5 才接受候选，防止「人数/数量」等弱子串重叠制造误导性近似（`外星人数量` 这类永远 `NO_RESULT`）。
-3. **结构化永远优先**（AD-21）：语义只在 EXACT → ALIAS → PARTIAL 全部失败后作为 `SEMANTIC_CANDIDATE` 兜底；候选事实仍来自真实记录索引（`lookupMetric`），**绝不生成数值**。
-4. **可关闭**：设置里「语义兜底」开关；关闭后严格只做结构化匹配。
+1. **Local hash-vector + cosine** (`semantic.js`): embed metric "surface names" (canonical name + alias keys) as 256-dim unit vectors via character/bigram hashing; embed the query the same way, compute cosine, take top-3.
+2. **Threshold gating**: cosine ≥ 0.5 to accept a candidate, preventing weak substring overlaps (e.g. `人数`/`数量`) from creating misleading approximations (`外星人数量` always stays `NO_RESULT`).
+3. **Structured always wins** (AD-21): semantic only acts as `SEMANTIC_CANDIDATE` fallback after EXACT → ALIAS → PARTIAL all fail; candidate facts still come from the real record index (`lookupMetric`) — **never generates values**.
+4. **Can be disabled**: the "semantic fallback" toggle in settings; when off, only strict structured matching.
 
-新增状态 `SEMANTIC_CANDIDATE`（弹窗用橙色标识），检索顺序：`EXACT → ALIAS → PARTIAL → SEMANTIC_CANDIDATE → NO_RESULT`。
+New status `SEMANTIC_CANDIDATE` (shown in orange in the popup), retrieval order: `EXACT → ALIAS → PARTIAL → SEMANTIC_CANDIDATE → NO_RESULT`.
 
-示例：笔记写「本月到店人数为【待补充】」→ 语义层命中「进店人数」（0.71）→ 归一为「客流量」→ 返回真实值 1086.5（2026-07，经营数据-示例.xlsx 第 76 行）。
+Example: note writes `本月到店人数为【待补充】` → semantic layer hits `进店人数` (0.71) → normalized to `客流量` → returns real value 1086.5 (2026-07, 经营数据-示例.xlsx row 76).
 
-> M2b（不在本版）：接入 `transformers.js` + bge-zh（ONNX/WASM）替换 `embed` 实现可获得更强的语义映射；因涉及模型文件下载与 WASM 资源，默认保持「零依赖纯本地」。
+## M3: Editor inline completion (implemented in this version)
 
-## M3：编辑器内联补全（本版已实现）
+When you type the placeholder `【`, a candidate card pops up in place (`src/editor/inlineSuggest.js`, CodeMirror 6):
 
-输入占位符「**【**」时，光标处就地弹出候选卡片（`src/editor/inlineSuggest.js`，CodeMirror 6）：
+- **Candidates**: `Engine.suggest(cursor-prefix)` reuses the full pipeline — it automatically combines the note's first line (entity/date title) + the paragraph before the cursor into a query segment, then runs request detection → structured → semantic fallback;
+- **Interaction**: `↓/↑` to switch candidates, **Enter** or **click** inserts the real value and auto-closes `】`, `Esc` closes;
+- **Trace visible**: each candidate shows `value metric@date entity (file:row)`; status/explanation in the title line (EXACT/ALIAS/PARTIAL/SEMANTIC_CANDIDATE/NO_RESULT).
+- **Never fabricates**: when nothing matches it shows `NO_RESULT` instead of forcing a number.
 
-- **候选**：`Engine.suggest(光标前句段)` 复用完整链路——自动把**笔记首行（主体/日期标题）+ 光标前段落**合成查询段，再做请求检测 → 结构化 → 语义兜底；
-- **交互**：`↓/↑` 切换候选，**回车**或**点击**插入真实数值并自动补上「】」，`Esc` 关闭；
-- **溯源可见**：每条候选显示 `数值 指标@日期 主体（文件:行号）`；状态/说明在标题行（EXACT/ALIAS/PARTIAL/SEMANTIC_CANDIDATE/NO_RESULT）。
-- **绝不编造**：检索不到同样显示 `NO_RESULT` 提示，而不是硬塞一个数。
+Toggle in settings (default on). CodeMirror packages are injected by the Obsidian runtime (`build.mjs` marks them external, not bundled).
 
-设置里可开关（默认开）。CodeMirror 包由 Obsidian 运行时注入（`build.mjs` 已 external，不打包）。
+## Roadmap
 
-## 路线图（后续版本）
-
-- **M4 宽表列识别增强**：任意主体矩阵（主体×指标×月份）的自动识别与折叠。
-- **M5 候选历史与常用指标**：记录每次点选，后续排序加权。
+- **M4 Wide-table column recognition**: auto-detect and fold arbitrary entity matrices (entity × metric × month).
+- **M5 Candidate history & frequent metrics**: record every pick, weight future ranking.
 
 ## License
 
-MIT License — 详见 [LICENSE](LICENSE)。
+MIT License — see [LICENSE](LICENSE).
