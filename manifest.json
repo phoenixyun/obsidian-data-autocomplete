@@ -3,7 +3,7 @@
   "name": "Data Autocomplete",
   "version": "0.1.8",
   "minAppVersion": "1.4.0",
-  "description": "A fully local data autocomplete engine: parses Excel/CSV files in your vault, retrieves real values by report context with forced source tracing. No external services, no LLM. Supports placeholder completion, wavy underline + dropdown/Tab completion, semantic fallback, manual search, and backup restore.",
+  "description": "Fully local data autocomplete: parses Excel/CSV in your vault, retrieves real values by report context with source tracing. No external services, no LLM. Placeholder completion, wavy underline + dropdown/Tab, semantic fallback, manual search.",
   "author": "phoenixyun",
   "authorUrl": "https://github.com/phoenixyun",
   "isDesktopOnly": true
