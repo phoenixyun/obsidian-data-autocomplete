@@ -1,0 +1,19 @@
+{
+  "name": "obsidian-data-autocomplete",
+  "version": "0.1.6",
+  "private": true,
+  "description": "Obsidian 内完全本地运行的数据自动补全引擎：解析 vault 内 Excel/CSV，按报告上下文检索真实数据并强制溯源（无外部服务、无 LLM）",
+  "scripts": {
+    "build": "node build.mjs",
+    "test:engine": "node test/engine.test.mjs"
+  },
+  "dependencies": {
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  },
+  "allowScripts": {
+    "esbuild@0.24.2": true
+  }
+}

@@ -1,0 +1,249 @@
+/* 数据自动补全（纯本地 · 无 LLM）——弹窗样式 */
+.store-ac-modal {
+  max-width: 720px;
+}
+
+.store-ac-header {
+  border-bottom: 1px solid var(--background-modifier-border);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+.store-ac-header h3 {
+  margin: 0 0 4px 0;
+}
+.store-ac-context,
+.store-ac-meta {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+}
+
+.store-ac-card {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  background: var(--background-secondary);
+}
+.store-ac-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.store-ac-kind {
+  font-weight: 600;
+  color: var(--interactive-accent);
+}
+.store-ac-conf {
+  font-size: var(--font-ui-smaller);
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+.conf-high { background: #2b7a4b33; color: #2b7a4b; }
+.conf-medium { background: #b8860b33; color: #8a6d00; }
+.conf-low { background: #8883; color: var(--text-muted); }
+.store-ac-metric { font-weight: 500; }
+.store-ac-placeholder {
+  color: var(--text-error);
+  background: #d9262633;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: var(--font-ui-smaller);
+}
+.store-ac-sentence {
+  color: var(--text-normal);
+  background: var(--background-primary);
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin: 4px 0;
+  font-size: var(--font-ui-smaller);
+  border-left: 3px solid var(--interactive-accent);
+}
+.store-ac-dims {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  margin: 4px 0;
+}
+.store-ac-state-ok { color: #2b7a4b; font-weight: 600; font-size: var(--font-ui-smaller); }
+.store-ac-state-none { color: var(--text-error); font-weight: 600; font-size: var(--font-ui-smaller); }
+.store-ac-state-sem { color: #a05c1e; font-weight: 600; font-size: var(--font-ui-smaller); }
+
+/* ---------- M3 编辑器内联补全 ---------- */
+/* Obsidian 的 CM tooltip 外层容器默认是实色背景，会盖住玻璃效果；
+   通过 tooltipSpec 的 class 属性给容器加 .store-ac-tip，精确透明化（含 section/arrow 内层），
+   露出 backdrop-filter 的玻璃质感（Apple 风格）。 */
+.cm-tooltip.store-ac-tip,
+.cm-tooltip.store-ac-tip .cm-tooltip-section,
+.cm-tooltip.store-ac-tip .cm-tooltip-arrow,
+.cm-tooltip.store-ac-tip > * {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+/* 玻璃面板：浅色主题 = 白色玻璃，深色主题 = 深色玻璃（Apple 毛玻璃配色）。
+   不用 --background-primary（浅色下是 #e4e4e4 灰，会和编辑器背景同色，看不出玻璃）。 */
+.store-ac-inline {
+  position: relative;
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border-radius: 14px;
+  padding: 6px;
+  max-width: 520px;
+  font-family: var(--font-text);
+  font-size: var(--font-ui-smaller);
+  overflow: hidden;
+}
+body.theme-light .store-ac-inline {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18), 0 0 0 0.5px rgba(255, 255, 255, 0.7) inset;
+}
+body.theme-dark .store-ac-inline {
+  background: rgba(28, 28, 30, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45), 0 0 0 0.5px rgba(255, 255, 255, 0.08) inset;
+}
+.store-ac-inline-title {
+  position: relative;
+  z-index: 2;
+  padding: 3px 10px 6px;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.65;
+}
+.store-ac-inline-title.is-ok { color: #2b7a4b; }
+.store-ac-inline-title.is-sem { color: #a05c1e; }
+.store-ac-inline-title.is-none { color: var(--text-error); }
+.store-ac-inline-title.is-metric { color: var(--text-accent); }
+.store-ac-inline-none {
+  position: relative;
+  z-index: 2;
+  padding: 6px 10px;
+  color: var(--text-error);
+  font-size: var(--font-ui-smaller);
+  background: color-mix(in srgb, var(--text-error) 8%, transparent);
+  border-radius: 8px;
+}
+
+/* 玻璃态滑动滑块：独立背景层，translateY 平滑滑动（macOS 设置列表风） */
+.store-ac-inline-slider {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 0;
+  height: 0;
+  z-index: 1;
+  border-radius: 8px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--interactive-accent) 20%, transparent),
+    color-mix(in srgb, var(--interactive-accent) 6%, transparent)
+  );
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.14), 0 0 0 1px color-mix(in srgb, var(--interactive-accent) 16%, transparent) inset;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), height 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  opacity: 0;
+}
+.store-ac-inline-slider.is-visible {
+  opacity: 1;
+}
+
+.store-ac-inline-item {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  color: var(--text-normal);
+  padding: 5px 10px;
+  margin: 1px 0;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.12s ease, font-weight 0.12s ease;
+}
+.store-ac-inline-item:hover {
+  color: var(--text-normal);
+  font-weight: 600;
+}
+.store-ac-inline-item.is-active {
+  color: var(--text-on-accent, var(--text-normal));
+  font-weight: 600;
+  outline: none;
+}
+.store-ac-inline-item:focus { outline: none; }
+.store-ac-note { color: var(--text-muted); font-weight: 400; }
+
+.store-ac-facts { margin: 6px 0; }
+.store-ac-fact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+  padding: 3px 0;
+  border-top: 1px dashed var(--background-modifier-border);
+}
+.store-ac-value {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.store-ac-factmeta {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+}
+.store-ac-source {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
+  font-style: italic;
+}
+.store-ac-noresult {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-style: italic;
+}
+.store-ac-copy {
+  margin-top: 4px;
+  font-size: var(--font-ui-smaller);
+}
+.store-ac-empty {
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 8px 0;
+}
+.store-ac-footer {
+  border-top: 1px solid var(--background-modifier-border);
+  margin-top: 10px;
+  padding-top: 6px;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
+  text-align: right;
+}
+.store-ac-hint {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  margin-top: 12px;
+}
+/* 上下文波浪线：当前行内引擎识别的门店/日期/指标/占位符统一红色波浪下划线 */
+.store-ac-wave {
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: #e05252;
+  -webkit-text-decoration-line: underline;
+  -webkit-text-decoration-style: wavy;
+  -webkit-text-decoration-color: #e05252;
+  text-underline-offset: 3px;
+}

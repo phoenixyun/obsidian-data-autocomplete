@@ -1,0 +1,10 @@
+{
+  "id": "data-autocomplete",
+  "name": "数据自动补全（纯本地 · 无 LLM）",
+  "version": "0.1.6",
+  "minAppVersion": "1.4.0",
+  "description": "Obsidian 内完全本地运行的数据自动补全引擎：直接解析 vault 内 Excel/CSV，按报告上下文从真实数据检索候选数值并强制溯源；无外部服务、无 LLM。支持占位符补全、指标缺值波浪线 + 下拉/Tab 补全、语义兜底、手动搜索、备份恢复。",
+  "author": "phoenixyun",
+  "authorUrl": "https://github.com/phoenixyun",
+  "isDesktopOnly": true
+}
