@@ -239,7 +239,11 @@ body.theme-dark .store-ac-inline {
 }
 /* 上下文波浪线：当前行内引擎识别的门店/日期/指标/占位符统一红色波浪下划线 */
 .store-ac-wave {
-  text-decoration: underline wavy #e05252;
-  -webkit-text-decoration: underline wavy #e05252;
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: #e05252;
+  -webkit-text-decoration-line: underline;
+  -webkit-text-decoration-style: wavy;
+  -webkit-text-decoration-color: #e05252;
   text-underline-offset: 3px;
 }

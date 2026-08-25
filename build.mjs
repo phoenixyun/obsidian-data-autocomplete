@@ -10,9 +10,13 @@ await build({
   format: "cjs",
   platform: "browser",
   target: ["es2020"],
+  alias: {
+    // xlsx 库内部 require("fs") 用于可选的 set_fs 路径；插件从不调用，
+    // 用空 stub 消除产物中的 Node fs 引用（Obsidian 审核 Direct Filesystem Access 警告）
+    fs: "./stubs/fs.js",
+  },
   external: [
     "obsidian",
-    "fs",
     "path",
     "crypto",
     "stream",
