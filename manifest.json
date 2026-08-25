@@ -1,7 +1,7 @@
 {
   "id": "data-autocomplete",
   "name": "Data Autocomplete",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "minAppVersion": "1.4.0",
   "description": "Fully local data autocomplete: parses Excel/CSV in your vault, retrieves real values by report context with source tracing. No external services, no LLM. Placeholder completion, wavy underline + dropdown/Tab, semantic fallback, manual search.",
   "author": "phoenixyun",
