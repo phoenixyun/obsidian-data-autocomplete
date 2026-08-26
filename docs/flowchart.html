@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Data Autocomplete — Context Recommendation Flow</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    background: #f6f8fa;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+  }
+  .canvas {
+    background: #ffffff;
+    border: 1px solid #d0d7de;
+    border-radius: 12px;
+    padding: 36px 40px;
+    max-width: 900px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  }
+  h1 {
+    font-size: 22px;
+    color: #1f2328;
+    margin-bottom: 6px;
+  }
+  .sub {
+    font-size: 13px;
+    color: #57606a;
+    margin-bottom: 28px;
+  }
+  .flow { display: flex; flex-direction: column; align-items: center; gap: 0; }
+  .node {
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: center;
+    min-width: 220px;
+    max-width: 460px;
+  }
+  .start { background: #1f2328; color: #fff; font-weight: 600; }
+  .process { background: #eef1f6; color: #1f2328; border: 1px solid #d0d7de; }
+  .decision { background: #fff8e1; color: #7a5c00; border: 1.5px solid #f0c000; border-radius: 10px; }
+  .state-exact { background: #2e7d32; color: #fff; font-weight: 600; }
+  .state-alias { background: #2e7d32; color: #fff; font-weight: 600; }
+  .state-partial { background: #f9a825; color: #1f2328; font-weight: 600; }
+  .state-semantic { background: #ef6c00; color: #fff; font-weight: 600; }
+  .state-noresult { background: #c62828; color: #fff; font-weight: 600; }
+  .output { background: #e8f5e9; color: #1b5e20; border: 1px solid #81c784; }
+  .arrow {
+    width: 2px; height: 26px;
+    background: #8b949e;
+    position: relative;
+  }
+  .arrow::after {
+    content: "";
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #8b949e;
+  }
+  .branch {
+    display: flex; align-items: center; gap: 14px;
+    margin: 4px 0;
+  }
+  .branch-label {
+    font-size: 12px; color: #57606a;
+    background: #f6f8fa; border: 1px dashed #d0d7de;
+    border-radius: 6px; padding: 3px 8px;
+    white-space: nowrap;
+  }
+  .branch .arrow { height: 2px; width: 40px; }
+  .branch .arrow::after {
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #8b949e;
+    left: auto; right: 0;
+    transform: none;
+  }
+  .section-label {
+    font-size: 12px; font-weight: 600;
+    color: #0969da;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 18px 0 8px;
+    text-align: center;
+  }
+  .note {
+    font-size: 12px; color: #57606a;
+    background: #f6f8fa;
+    border-radius: 6px; padding: 8px 12px;
+    margin-top: 24px;
+    line-height: 1.6;
+  }
+  .note code {
+    background: #eef1f6; padding: 1px 5px; border-radius: 4px;
+    font-family: "SF Mono", Menlo, monospace; font-size: 11px;
+  }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <h1>Data Autocomplete — Context Recommendation Flow</h1>
+  <div class="sub">Fully local · No LLM · No external services · Never fabricates values</div>
+
+  <div class="flow">
+
+    <div class="section-label">① Data Parsing &amp; Index Storage</div>
+    <div class="node start">Excel / CSV files in vault<br><code style="font-size:12px">data-autocomplete-data/</code></div>
+    <div class="arrow"></div>
+    <div class="node process">parser.js — parse workbooks<br>Narrow table · Hierarchical wide table · Single-entity wide table</div>
+    <div class="arrow"></div>
+    <div class="node process">index.js — build in-memory index<br>byKey: <code>dim1|indicator|dim2</code> → records<br>byIndicator: indicator → records (cross-dim fallback)<br>dim1Values · indicatorNames · total count</div>
+    <div class="arrow"></div>
+    <div class="node process">semantic.js — build semantic index<br>256-dim hash vectors (char + bigram, FNV-1a)<br>surface names: canonical + alias keys</div>
+
+    <div class="section-label">② Context Recommendation</div>
+    <div class="node start">You type a placeholder <code>【待补充】</code> or a metric name with no value</div>
+    <div class="arrow"></div>
+    <div class="node decision">Parse report context (context.js)</div>
+    <div class="arrow"></div>
+    <div class="node process">First-line title → extract entity / date<br>Current paragraph → extract metric / entity / date<br>Nearest-date binding (closest date to placeholder or metric)</div>
+    <div class="arrow"></div>
+    <div class="node decision">Request detection (detector.js)</div>
+    <div class="branch">
+      <div class="branch-label">Type A: placeholder 【待补充】 conf 0.9</div>
+      <div class="arrow"></div>
+      <div class="branch-label">Type B: metric name, no value within 12 chars conf 0.6</div>
+    </div>
+    <div class="arrow"></div>
+    <div class="node decision">Retrieval state machine (retrieval.js)</div>
+    <div class="branch">
+      <div class="branch-label">Metric name exact hit</div>
+      <div class="arrow"></div>
+      <div class="branch-label">Alias table hit</div>
+      <div class="arrow"></div>
+      <div class="branch-label">Partial match</div>
+    </div>
+    <div class="branch">
+      <div class="node state-exact">EXACT</div>
+      <div class="node state-alias">ALIAS</div>
+      <div class="node state-partial">PARTIAL</div>
+    </div>
+    <div class="arrow"></div>
+    <div class="node decision">All structured misses → semantic fallback</div>
+    <div class="branch">
+      <div class="branch-label">Cosine similarity ≥ 0.5</div>
+      <div class="arrow"></div>
+      <div class="branch-label">Similarity too weak</div>
+    </div>
+    <div class="branch">
+      <div class="node state-semantic">SEMANTIC_CANDIDATE</div>
+      <div class="node state-noresult">NO_RESULT</div>
+    </div>
+    <div class="arrow"></div>
+    <div class="node output">Fetch facts from real record index<br>dedupe by <code>entity|indicator|date</code>, top 3<br>Output: real value + source trace (file / sheet / row)</div>
+    <div class="arrow"></div>
+    <div class="node process">Editor inline dropdown: ↑↓ select, Enter / click insert</div>
+  </div>
+
+  <div class="note">
+    Retrieval priority: <code>EXACT → ALIAS → PARTIAL → SEMANTIC_CANDIDATE → NO_RESULT</code>.<br>
+    Structured hits always win over semantic (AD-21); semantic fallback is a fully local hash-vector + cosine (256-dim, no model, no network), accepting only strong approximations ≥ 0.5.<br>
+    All candidate facts come from the real record index, each with <code>file / sheet / row</code> source trace; when nothing matches it shows <code>NO_RESULT</code> — it never invents numbers.
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Data Autocomplete — 上下文推荐机制流程图（中文版）</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f6f8fa;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+  }
+  .canvas {
+    background: #ffffff;
+    border: 1px solid #d0d7de;
+    border-radius: 12px;
+    padding: 36px 40px;
+    max-width: 900px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  }
+  h1 {
+    font-size: 22px;
+    color: #1f2328;
+    margin-bottom: 6px;
+  }
+  .sub {
+    font-size: 13px;
+    color: #57606a;
+    margin-bottom: 28px;
+  }
+  .flow { display: flex; flex-direction: column; align-items: center; gap: 0; }
+  .node {
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: center;
+    min-width: 220px;
+    max-width: 460px;
+  }
+  .start { background: #1f2328; color: #fff; font-weight: 600; }
+  .process { background: #eef1f6; color: #1f2328; border: 1px solid #d0d7de; }
+  .decision { background: #fff8e1; color: #7a5c00; border: 1.5px solid #f0c000; border-radius: 10px; }
+  .state-exact { background: #2e7d32; color: #fff; font-weight: 600; }
+  .state-alias { background: #2e7d32; color: #fff; font-weight: 600; }
+  .state-partial { background: #f9a825; color: #1f2328; font-weight: 600; }
+  .state-semantic { background: #ef6c00; color: #fff; font-weight: 600; }
+  .state-noresult { background: #c62828; color: #fff; font-weight: 600; }
+  .output { background: #e8f5e9; color: #1b5e20; border: 1px solid #81c784; }
+  .arrow {
+    width: 2px; height: 26px;
+    background: #8b949e;
+    position: relative;
+  }
+  .arrow::after {
+    content: "";
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #8b949e;
+  }
+  .branch {
+    display: flex; align-items: center; gap: 14px;
+    margin: 4px 0;
+  }
+  .branch-label {
+    font-size: 12px; color: #57606a;
+    background: #f6f8fa; border: 1px dashed #d0d7de;
+    border-radius: 6px; padding: 3px 8px;
+    white-space: nowrap;
+  }
+  .branch .arrow { height: 2px; width: 40px; }
+  .branch .arrow::after {
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #8b949e;
+    left: auto; right: 0;
+    transform: none;
+  }
+  .section-label {
+    font-size: 12px; font-weight: 600;
+    color: #0969da;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 18px 0 8px;
+    text-align: center;
+  }
+  .note {
+    font-size: 12px; color: #57606a;
+    background: #f6f8fa;
+    border-radius: 6px; padding: 8px 12px;
+    margin-top: 24px;
+    line-height: 1.6;
+  }
+  .note code {
+    background: #eef1f6; padding: 1px 5px; border-radius: 4px;
+    font-family: "SF Mono", Menlo, monospace; font-size: 11px;
+  }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <h1>Data Autocomplete — 上下文推荐机制流程图</h1>
+  <div class="sub">纯本地 · 无 LLM · 无外部服务 · 绝不编造数值</div>
+
+  <div class="flow">
+
+    <div class="section-label">① 数据解析与索引存储</div>
+    <div class="node start">Vault 内的 Excel / CSV 文件<br><code style="font-size:12px">data-autocomplete-data/</code></div>
+    <div class="arrow"></div>
+    <div class="node process">parser.js — 解析工作簿<br>窄表 · 层级宽表 · 单主体宽表</div>
+    <div class="arrow"></div>
+    <div class="node process">index.js — 构建内存索引<br>byKey: <code>主体|指标|日期</code> → 记录<br>byIndicator: 指标 → 记录（跨维度兜底）<br>主体值集合 · 指标名集合 · 总记录数</div>
+    <div class="arrow"></div>
+    <div class="node process">semantic.js — 构建语义索引<br>256 维哈希向量（字符 + 二元组，FNV-1a）<br>表面名：规范名 + 别名键</div>
+
+    <div class="section-label">② 上下文推荐</div>
+    <div class="node start">你在笔记中写下占位符 <code>【待补充】</code> 或指标名缺值</div>
+    <div class="arrow"></div>
+    <div class="node decision">解析报告上下文（context.js）</div>
+    <div class="arrow"></div>
+    <div class="node process">首行标题 → 提取 主体 / 日期<br>当前段落 → 提取 指标 / 主体 / 日期<br>就近日期绑定（离占位符或指标最近的日期）</div>
+    <div class="arrow"></div>
+    <div class="node decision">请求检测（detector.js）</div>
+    <div class="branch">
+      <div class="branch-label">A类 占位符【待补充】置信度 0.9</div>
+      <div class="arrow"></div>
+      <div class="branch-label">B类 指标名后 12 字符内无数值 置信度 0.6</div>
+    </div>
+    <div class="arrow"></div>
+    <div class="node decision">检索状态机（retrieval.js）</div>
+    <div class="branch">
+      <div class="branch-label">指标名完全命中</div>
+      <div class="arrow"></div>
+      <div class="branch-label">命中别名表</div>
+      <div class="arrow"></div>
+      <div class="branch-label">部分匹配</div>
+    </div>
+    <div class="branch">
+      <div class="node state-exact">EXACT 精确命中</div>
+      <div class="node state-alias">ALIAS 别名命中</div>
+      <div class="node state-partial">PARTIAL 部分命中</div>
+    </div>
+    <div class="arrow"></div>
+    <div class="node decision">结构化全部未命中 → 语义兜底</div>
+    <div class="branch">
+      <div class="branch-label">余弦相似度 ≥ 0.5</div>
+      <div class="arrow"></div>
+      <div class="branch-label">相似度不足</div>
+    </div>
+    <div class="branch">
+      <div class="node state-semantic">SEMANTIC_CANDIDATE 语义候选</div>
+      <div class="node state-noresult">NO_RESULT 无结果</div>
+    </div>
+    <div class="arrow"></div>
+    <div class="node output">从真实记录索引取事实<br>按 <code>主体|指标|日期</code> 去重取前 3 条<br>输出：真实数值 + 来源溯源（文件 / 工作表 / 行号）</div>
+    <div class="arrow"></div>
+    <div class="node process">编辑器内联下拉：↑↓ 选择，回车 / 点击插入</div>
+  </div>
+
+  <div class="note">
+    检索优先级：<code>EXACT → ALIAS → PARTIAL → SEMANTIC_CANDIDATE → NO_RESULT</code>。<br>
+    结构化命中永远优先于语义（AD-21）；语义兜底为纯本地哈希向量 + 余弦相似度（256 维，无模型、无网络），只接受 ≥ 0.5 的强近似。<br>
+    所有候选事实都来自真实记录索引，每条带 <code>文件 / 工作表 / 行号</code> 溯源；检索不到显示 <code>NO_RESULT</code>，绝不编造数值。
+  </div>
+</div>
+</body>
+</html>
