@@ -23,9 +23,9 @@ It depends on no external service. Data stays inside the vault and works fully o
 
 Watch a short demo of the plugin in action (placeholder completion, wavy-underline + dropdown, source tracing):
 
-<video controls src="https://raw.githubusercontent.com/phoenixyun/obsidian-data-autocomplete/main/docs/demo.mp4"></video>
+<video controls src="docs/demo.mp4"></video>
 
-Or download it directly: [demo.mp4](https://raw.githubusercontent.com/phoenixyun/obsidian-data-autocomplete/main/docs/demo.mp4)
+Or download it directly: [demo.mp4](docs/demo.mp4)
 
 ## Install (3 steps)
 
