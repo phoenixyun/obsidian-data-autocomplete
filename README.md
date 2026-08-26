@@ -19,6 +19,14 @@ When writing reports or documents, you often need to fill "metric name + value" 
 
 It depends on no external service. Data stays inside the vault and works fully offline.
 
+## Demo
+
+Watch a short demo of the plugin in action (placeholder completion, wavy-underline + dropdown, source tracing):
+
+<video controls src="https://raw.githubusercontent.com/phoenixyun/obsidian-data-autocomplete/main/docs/demo.mp4"></video>
+
+Or download it directly: [demo.mp4](https://raw.githubusercontent.com/phoenixyun/obsidian-data-autocomplete/main/docs/demo.mp4)
+
 ## Install (3 steps)
 
 1. **Add data**: create a `data-autocomplete-data/` folder in your vault root and put Excel/CSV files inside (supported layouts:
