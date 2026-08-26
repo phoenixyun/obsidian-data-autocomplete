@@ -19,11 +19,49 @@ When writing reports or documents, you often need to fill "metric name + value" 
 
 It depends on no external service. Data stays inside the vault and works fully offline.
 
+## How the context recommendation works
+
+When you type a placeholder (`【待补充】`) or a metric name without a value, the plugin runs a **5-stage retrieval state machine** — it never invents numbers:
+
+```mermaid
+flowchart TD
+    A[你在笔记中写下占位符【待补充】或指标名缺值] --> B{解析报告上下文}
+    B --> B1[首行标题: 提取 主体/日期]
+    B --> B2[当前段落: 提取 指标/主体/日期]
+    B --> B3[就近日期绑定: 占位符或指标位置最近的日期]
+
+    B1 & B2 & B3 --> C[请求检测 detector]
+    C --> C1[A类 占位符【待补充】 置信度 0.9]
+    C --> C2[B类 指标名后12字符内无数值 置信度 0.6]
+
+    C1 & C2 --> D{检索状态机 retrieval}
+    D -->|指标名完全命中| E1[EXACT 精确命中]
+    D -->|命中别名表| E2[ALIAS 别名命中]
+    D -->|部分匹配| E3[PARTIAL 部分命中]
+    D -->|结构化全部未命中| E4{语义兜底 semantic}
+    E4 -->|余弦相似度 ≥ 0.5| E5[SEMANTIC_CANDIDATE 语义候选]
+    E4 -->|相似度不足| E6[NO_RESULT 无结果]
+
+    E1 & E2 & E3 & E5 --> F[从真实记录索引取事实]
+    F --> F1[按 主体|指标|日期 去重取前3条]
+    F1 --> G[输出候选: 真实数值 + 来源溯源 文件/工作表/行号]
+    G --> H[编辑器内联下拉: ↑↓选择 回车/点击插入]
+    E6 --> H2[显示 NO_RESULT 绝不编造数值]
+
+    style E1 fill:#2e7d32,color:#fff
+    style E2 fill:#2e7d32,color:#fff
+    style E3 fill:#f9a825,color:#000
+    style E5 fill:#ef6c00,color:#fff
+    style E6 fill:#c62828,color:#fff
+```
+
+**检索优先级**：`EXACT → ALIAS → PARTIAL → SEMANTIC_CANDIDATE → NO_RESULT`。结构化命中永远优先于语义（AD-21）；语义兜底是纯本地哈希向量 + 余弦相似度（256 维，无模型、无网络），且只接受相似度 ≥ 0.5 的强近似，防止弱子串重叠产生误导候选。所有候选事实都来自真实记录索引，每条都带 `文件/工作表/行号` 溯源。
+
 ## Demo
 
 Watch a short demo of the plugin in action (placeholder completion, wavy-underline + dropdown, source tracing):
 
-<video controls src="docs/demo.mp4"></video>
+![demo](docs/demo.mp4)
 
 Or download it directly: [demo.mp4](docs/demo.mp4)
 
